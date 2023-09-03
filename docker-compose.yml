@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  mageia:
+    image: armmageia
+    container_name: armmageia
+    restart: always
+    build: .
+    ports:
+      - "2222:2222"
+    volumes:
+      - /etc/ssh:/etc/ssh
+      - /root/.ssh:/root/.ssh

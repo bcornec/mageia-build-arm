@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Creating Mageia docker images and containers on Debian based ARM system
+# Accessible via port 2222 with appropriate SSH keys
+
+for i in mga-arm-1; do
+#for i in mga-arm-1 mga-arm-2; do
+	echo "Working on system $i"
+	echo "--------------------"
+	ssh $i apt update -y
+	ssh $i apt install -y apparmor docker.io docker-compose
+	scp docker-compose.yml Dockerfile ${i}:
+	ssh $i docker-compose build
+	ssh $i docker-compose up -d
+	# check
+	ssh -p 2222 $i rpm -aq | wc -l
+	ssh -p 2222 $i lsb_release -a
+done
