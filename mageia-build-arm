@@ -5,11 +5,19 @@
 
 for i in mga-arm-1; do
 #for i in mga-arm-1 mga-arm-2; do
+	cat > fix-rpm-db << 'EOF'
+rpm --rebuilddb 2> /tmp/$$
+DIR=`tail -1 /tmp/$$ | awk '{print $9}'`
+rm -rf /var/lib/rpm
+mv $DIR /var/lib/rpm
+rm -f /tmp/$$
+EOF
+	chmod 755 fix-rpm-db
 	echo "Working on system $i"
 	echo "--------------------"
 	ssh $i apt update -y
 	ssh $i apt install -y apparmor docker.io docker-compose
-	scp docker-compose.yml Dockerfile ${i}:
+	scp docker-compose.yml Dockerfile fix-rpm-db ${i}:
 	ssh $i docker-compose build
 	ssh $i docker-compose up -d
 	# check

@@ -7,5 +7,9 @@ RUN urpmi -y openssh-server
 RUN urpmi.removemedia -a
 RUN urpmi.addmedia --distrib mga http://distrib-coffee.ipsl.jussieu.fr/pub/linux/Mageia/distrib/9/aarch64/
 RUN urpmi.update -a
+# Rebuild RPM DB
+RUN urpmi --auto rpm
+COPY fix-rpm-db /tmp
+RUN /tmp/fix-rpm-db
 RUN urpmi --auto --auto-select
 ENTRYPOINT /usr/sbin/sshd -D -p 2222
