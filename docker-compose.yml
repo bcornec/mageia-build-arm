@@ -11,3 +11,4 @@ services:
     volumes:
       - /etc/ssh:/etc/ssh
       - /root/.ssh:/root/.ssh
+      - /root/.ssh:/home/iurt/.ssh
