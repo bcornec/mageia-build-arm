@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+
+ARCH=aarch64
+NODE=iurt@mga-arm-1
+PORT=2222
+MIRROR=http://fr2.rpmfind.net/linux/mageia/distrib
+PKG=project-builder-0.16.1-2.mga9.src.rpm
+SPOOL=/home/iurt/tmp/mageia-iurt
+MGAV=9
+
+ssh -p $PORT ${NODE} curl -O $MIRROR/$MGAV/SRPMS/core/release/${PKG}
+ssh -p $PORT $NODE iurt --copy_srpm --group  --config local_spool $SPOOL --no_rsync --repository $MIRROR --chrooted-urpmi $MIRROR -p foo@foo.net --rebuild $MGAV $ARCH $PKG
+ssh -p $PORT $NODE ls -alR $SPOOL/*.rpm
+scp -p -P $PORT ${NODE}:$SPOOL/*.rpm .

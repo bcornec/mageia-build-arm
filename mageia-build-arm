@@ -3,10 +3,11 @@
 # Creating Mageia docker images and containers on Debian based ARM system
 # Accessible via port 2222 with appropriate SSH keys
 
+PORT=2222
 #for i in mga-arm-1; do
 cat > entrypoint.sh << EOF
-/usr/sbin/sshd -D -p 2222 &
-su - iurt -c "sleep infinity"
+/usr/sbin/sshd -D -p $PORT &
+sleep infinity
 EOF
 chmod 755 entrypoint.sh
 for i in mga-arm-1 mga-arm-2; do
@@ -14,12 +15,18 @@ for i in mga-arm-1 mga-arm-2; do
 	echo "--------------------"
 	ssh $i apt update -y
 	ssh $i apt install -y apparmor docker.io docker-compose
-	scp docker-compose.yml Dockerfile iurt entrypoint.sh ${i}:
+	scp -p docker-compose.yml Dockerfile iurt entrypoint.sh ${i}:
+	dis=`grep FROM Dockerfile | awk '{print $2}'`
+	CTNS=`ssh $i docker container ls -a -q`
+	ssh $i docker container stop $CTNS
+	ssh $i docker container prune -f
+	ssh $i docker image prune -f
+	ssh $i docker pull $dis
 	ssh $i docker-compose build
 	ssh $i docker-compose up -d
 	# check
 	echo -n "Distribution installed: "
-	ssh -p 2222 $i lsb_release -a
+	ssh -p $PORT iurt@$i lsb_release -a
 	echo -n "Number of packages installed: "
-	ssh -p 2222 $i rpm -aq | wc -l
+	ssh -p $PORT iurt@$i rpm -aq | wc -l
 done

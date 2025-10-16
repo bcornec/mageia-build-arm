@@ -5,10 +5,9 @@ services:
     image: armmageia
     container_name: armmageia
     restart: always
-    build: .
+    build: /root
+    privileged: true
     ports:
       - "2222:2222"
     volumes:
-      - /etc/ssh:/etc/ssh
       - /root/.ssh:/root/.ssh
-      - /root/.ssh:/home/iurt/.ssh

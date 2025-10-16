@@ -1,1 +1,2 @@
-iurt	ALL=root NOPASSWD:/usr/sbin/iurt_root_command
+Defaults:iurt !requiretty
+iurt	ALL=(root) NOPASSWD:/usr/sbin/iurt_root_command
