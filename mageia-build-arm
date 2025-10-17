@@ -18,13 +18,15 @@ for i in mga-arm-1 mga-arm-2; do
 	scp -p docker-compose.yml Dockerfile iurt entrypoint.sh ${i}:
 	dis=`grep FROM Dockerfile | awk '{print $2}'`
 	CTNS=`ssh $i docker container ls -a -q`
+	# Purge potential remaining docker content
 	ssh $i docker container stop $CTNS
 	ssh $i docker container prune -f
 	ssh $i docker image prune -f
+	# Restart from clean Mageia Docker image and build and run
 	ssh $i docker pull $dis
 	ssh $i docker-compose build
 	ssh $i docker-compose up -d
-	# check
+	# check it works
 	echo -n "Distribution installed: "
 	ssh -p $PORT iurt@$i lsb_release -a
 	echo -n "Number of packages installed: "
