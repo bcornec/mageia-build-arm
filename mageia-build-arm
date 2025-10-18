@@ -1,15 +1,36 @@
 #!/bin/bash
 #
 # Creating Mageia docker images and containers on Debian based ARM system
-# Accessible via port 2222 with appropriate SSH keys
-
-PORT=2222
+#
+# Internal port value for unpriviledge launch of sshd
+IPORT=2222
+# Externally accessible via this port with appropriate SSH keys - may differ
+EPORT=2222
 #for i in mga-arm-1; do
 cat > entrypoint.sh << EOF
-/usr/sbin/sshd -D -p $PORT &
+/usr/sbin/sshd -D -p $IPORT &
 sleep infinity
 EOF
 chmod 755 entrypoint.sh
+
+cat > docker-compose.yml << EOF
+version: "3"
+
+services:
+  mageia:
+    image: armmageia
+    container_name: armmageia
+    restart: always
+    build: /root
+    # needed as iurt uses mount/umount and ns
+    privileged: true
+    ports:
+      - "$EPORT:$IPORT"
+    volumes:
+      - /root/.ssh:/root/.ssh
+EOF
+chmod 644 docker-compose.yml
+
 for i in mga-arm-1 mga-arm-2; do
 	echo "Working on system $i"
 	echo "--------------------"
@@ -28,7 +49,9 @@ for i in mga-arm-1 mga-arm-2; do
 	ssh $i docker-compose up -d
 	# check it works
 	echo -n "Distribution installed: "
-	ssh -p $PORT iurt@$i lsb_release -a
+	ssh -p $EPORT iurt@$i lsb_release -a
 	echo -n "Number of packages installed: "
-	ssh -p $PORT iurt@$i rpm -aq | wc -l
+	ssh -p $EPORT iurt@$i rpm -aq | wc -l
 done
+
+rm -f docker-compose.yml entrypoint.sh

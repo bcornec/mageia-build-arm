@@ -12,6 +12,8 @@ COPY .ssh/authorized_keys /home/iurt/.ssh
 RUN chown -R iurt:iurt /home/iurt/.ssh
 RUN chmod 700 /home/iurt/.ssh
 RUN chmod 600 /home/iurt/.ssh/authorized_keys
+# Adds schedbot pubkey
+RUN echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD74XjxAUlKsEQngCGQ7uG1waCkd26ZbzUSUHdnQ3VGLxK2X8VTpDAN1xAxrQM2bTmED1o1y3UhI5n3QicJspB8DZUS7CW93bsE6GrIqh9e1HVbZXzV20esU2r68I5GUsBXXS5EQkUQfESAtAvL9cSARo/ZXiJ6yeX5OiFKofD6i1WnkboP6HM3fdG+vNZV5EYq1MU33NOUYR8HMMNFjcAiVpBjM++x1I+rIKro6l3jFKgBMfC1+afAB2o7en3CuqJtpcspb3A8wIKxXLWWK/aU5U8WK2lbixBzNWDb1Ug3HH7/DQdhZsZUe7U5bRlMe9U6OkJasOOeGqAuWrO6kcoN schedbotssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD74XjxAUlKsEQngCGQ7uG1waCkd26ZbzUSUHdnQ3VGLxK2X8VTpDAN1xAxrQM2bTmED1o1y3UhI5n3QicJspB8DZUS7CW93bsE6GrIqh9e1HVbZXzV20esU2r68I5GUsBXXS5EQkUQfESAtAvL9cSARo/ZXiJ6yeX5OiFKofD6i1WnkboP6HM3fdG+vNZV5EYq1MU33NOUYR8HMMNFjcAiVpBjM++x1I+rIKro6l3jFKgBMfC1+afAB2o7en3CuqJtpcspb3A8wIKxXLWWK/aU5U8WK2lbixBzNWDb1Ug3HH7/DQdhZsZUe7U5bRlMe9U6OkJasOOeGqAuWrO6kcoN schedbot' >> /home/iurt/.ssh/authorized_keys
 # Setup ssh server
 RUN chmod 750 /etc/ssh/sshd_config.d
 RUN chmod 640 /etc/ssh/sshd_config.d/*
