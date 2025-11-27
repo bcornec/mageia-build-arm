@@ -1,25 +1,34 @@
 #!/usr/bin/bash
 
-ARCH=aarch64
+ARCH=armv7hl
+#ARCH=aarch64
+LINUX32=""
+if [ $ARCH = "armv7hl" ]; then
+	LINUX32="linux32"
+fi
 NODE=iurt@mga-arm-1
 EPORT=2222
 MIRROR=http://fr2.rpmfind.net/linux/mageia/distrib
 SPOOL=/home/iurt/tmp/mageia-iurt
 MGAV=9
 
-#PKG=project-builder-0.16.1-2.mga9.src.rpm
-#PKG=bc-1.07.1-7.mga9.src.rpm
-#ZONE=release
-#for PKG in qtwebengine6-6.4.1-5.mga9.src.rpm webkit2-2.40.3-1.mga9.src.rpm; do
-ZONE=updates
-for PKG in firefox-128.6.0-1.mga9.src.rpm rust-1.82.0-1.mga9.src.rpm ; do
+#PKGS=project-builder-0.16.1-2.mga9.src.rpm
+PKGS="bc-1.07.1-7.mga9.src.rpm"
+ZONE=release
+#PKGS="qtwebengine6-6.4.1-5.mga9.src.rpm webkit2-2.40.3-1.mga9.src.rpm"
+#ZONE=updates
+#PKGS="firefox-140.5.0-1.mga9.src.rpm rust-1.82.0-1.mga9.src.rpm"
+
+mkdir -p RPMS
+for PKG in $PKGS ; do
 	echo ============= begin $PKG ==================
 	date
 	echo ===============================
 	ssh -p $EPORT ${NODE} curl -O $MIRROR/$MGAV/SRPMS/core/$ZONE/${PKG}
-	ssh -p $EPORT $NODE iurt --copy_srpm --group  --config local_spool $SPOOL --no_rsync --repository $MIRROR --chrooted-urpmi $MIRROR -p foo@foo.net --rebuild $MGAV $ARCH $PKG
+	ssh -p $EPORT $NODE $LINUX32 iurt --copy_srpm --group  --config local_spool $SPOOL --no_rsync --repository $MIRROR --chrooted-urpmi $MIRROR -p foo@foo.net --rebuild $MGAV $ARCH $PKG
 	ssh -p $EPORT $NODE ls -alR $SPOOL/*.rpm
-	scp -p -P $EPORT ${NODE}:$SPOOL/*.rpm .
+	scp -p -P $EPORT ${NODE}:$SPOOL/*.rpm RPMS
+	ssh -p $EPORT ${NODE} rm -f $SPOOL/*.rpm
 	echo ============= end $PKG ==================
 	date
 	echo ===============================

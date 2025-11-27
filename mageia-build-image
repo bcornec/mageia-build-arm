@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Recreate Mageia docker image and re-run the container 
+# based on modified packages detection
+
+# Run on the ARM node directly
+
+# Do we build: not by default
+BUILD=0
+
+while getopts "f" option
+do
+	case $option in
+		f)
+			echo "Force the rebuild of image"
+			BUILD=1
+			;;
+	esac
+done
+
+if [ _"$1" = _"" ]; then
+	echo "Missing parameter container name, can't continue"
+	exit -1
+fi
+CTNNAME=$1
+if [ ! -f Dockerfile ]; then
+	echo "Dockerfile missing, can't continue"
+	exit -1
+fi
+DIS=`grep FROM Dockerfile | awk '{print $2}'`
+if [ _"$DIS" = _"" ]; then
+	echo "Unable to detect original Docker image, can't continue"
+	exit -1
+fi
+CTN=`docker container ls -a -q -f name=$CTNNAME`
+if [ _"$CTN" = _"" ]; then
+	echo "No previous container running, building"
+	BUILD=1
+else
+	# Check whether packages are not up to date anymore wrt mirrors
+	PKGS=`docker container exec $CTNNAME urpmq --not-available`
+	if [ _"$PKGS" != _"" ]; then
+		BUILD=1
+	fi
+fi
+
+if [ $BUILD = 1 ]; then
+	# Purge potential remaining docker content
+	if [ _"$CTN" != _"" ]; then
+		docker container stop $CTN
+	fi
+	docker container prune -f
+	docker image prune -f
+	# Restart from clean Mageia Docker image and build and run
+	docker pull $DIS
+	docker-compose build
+	docker-compose up -d
+fi
